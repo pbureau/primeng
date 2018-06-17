@@ -159,6 +159,8 @@ export class ContextMenu implements AfterViewInit, OnDestroy {
 
     rightClickListener: any;
 
+    flagLeftClick: boolean = false;
+
     constructor(public el: ElementRef, public domHandler: DomHandler, public renderer: Renderer2, public zone: NgZone) { }
 
     ngAfterViewInit() {
@@ -197,8 +199,12 @@ export class ContextMenu implements AfterViewInit, OnDestroy {
     }
 
     hide() {
+        if(this.flagLeftClick) {
+            this.flagLeftClick = false;
+        } else {
         this.containerViewChild.nativeElement.style.display = 'none';
         this.unbindGlobalListeners();
+        }
     }
 
     moveOnTop() {

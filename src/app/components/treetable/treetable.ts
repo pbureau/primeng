@@ -16,7 +16,7 @@ import {DomHandler} from '../dom/domhandler';
                     (click)="toggle($event)"
                     [title]="node.expanded ? labelCollapse : labelExpand">
                 </a>
-                <div class="ui-chkbox ui-treetable-checkbox" *ngIf="treeTable.selectionMode == 'checkbox' && i==0"><div class="ui-chkbox-box ui-widget ui-corner-all ui-state-default">
+                <div class="ui-chkbox ui-treetable-checkbox" *ngIf="treeTable.selectionMode == 'checkbox' && i==0" (click)="onCheckboxClick($event)"><div class="ui-chkbox-box ui-widget ui-corner-all ui-state-default">
                     <span class="ui-chkbox-icon ui-clickable fa" 
                         [ngClass]="{'fa-check':isSelected(),'fa-minus':node.partialSelected}"></span></div></div
                 ><span *ngIf="!col.template">{{resolveFieldData(node.data,col.field)}}</span>
@@ -70,7 +70,16 @@ export class UITreeRow implements OnInit {
     }
     
     onRowClick(event: MouseEvent) {
-        this.treeTable.onRowClick(event, this.node);
+        if(this.treeTable.contextMenuLeftClick) {
+            let eventTarget = (<Element> event.target);
+            if(eventTarget.className && eventTarget.className.indexOf('ui-treetable-toggler') === 0) {
+                return;
+            }
+            this.treeTable.contextMenu.flagLeftClick = true;
+            this.treeTable.onRowRightClick(event, this.node);
+        } else {
+            this.treeTable.onRowClick(event, this.node);
+        }
     }
     
     onRowRightClick(event: MouseEvent) {
@@ -79,6 +88,12 @@ export class UITreeRow implements OnInit {
     
     rowDblClick(event: MouseEvent) {
       this.treeTable.onRowDblclick.emit({originalEvent: event, node: this.node});
+    }
+
+    onCheckboxClick(event: MouseEvent) {
+        this.treeTable.onRowClick(event, this.node);
+        event.stopPropagation();
+        event.preventDefault();
     }
 
     onRowTouchEnd() {
@@ -175,6 +190,8 @@ export class TreeTable implements AfterContentInit {
     @Input() collapsedIcon: string = "fa-caret-right";
     
     @Input() expandedIcon: string = "fa-caret-down";
+
+    @Input() contextMenuLeftClick: boolean = false;
         
     @Output() onRowDblclick: EventEmitter<any> = new EventEmitter();    
     
@@ -322,7 +339,7 @@ export class TreeTable implements AfterContentInit {
                 if(this.isSingleSelectionMode()) {
                     this.selection = node;
                 }
-                else if(this.isMultipleSelectionMode()) {
+                else if(this.isMultipleSelectionMode() || this.isCheckboxSelectionMode()) {
                     this.selection = [node];
                     this.selectionChange.emit(this.selection);
                 }
