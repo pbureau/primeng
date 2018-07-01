@@ -91,6 +91,7 @@ export class UITreeRow implements OnInit {
     }
 
     onCheckboxClick(event: MouseEvent) {
+        this.treeTable.contextMenu.hide();
         this.treeTable.onRowClick(event, this.node);
         event.stopPropagation();
         event.preventDefault();

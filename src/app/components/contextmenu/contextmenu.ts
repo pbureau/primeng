@@ -202,8 +202,8 @@ export class ContextMenu implements AfterViewInit, OnDestroy {
         if(this.flagLeftClick) {
             this.flagLeftClick = false;
         } else {
-        this.containerViewChild.nativeElement.style.display = 'none';
-        this.unbindGlobalListeners();
+            this.containerViewChild.nativeElement.style.display = 'none';
+            this.unbindGlobalListeners();
         }
     }
 
@@ -255,11 +255,20 @@ export class ContextMenu implements AfterViewInit, OnDestroy {
 
     bindGlobalListeners() {
         if (!this.documentClickListener) {
-            this.documentClickListener = this.renderer.listen('document', 'click', (event) => {
-                if (this.containerViewChild.nativeElement.offsetParent && event.button !== 2) {
-                    this.hide();
-                }
-            });
+            //if( (navigator.userAgent.match(/iPhone|iPad|iPod/i) != null) || (Meteor.isCordova && device.platform == "iOS")) {
+            if(true) {
+                this.documentClickListener = this.renderer.listen('document', 'touchstart', (event) => {
+                    if (this.containerViewChild.nativeElement.offsetParent && event.button !== 2) {
+                        this.hide();
+                    }
+                });
+            } /*else {
+                this.documentClickListener = this.renderer.listen('document', 'click', (event) => {
+                    if (this.containerViewChild.nativeElement.offsetParent && event.button !== 2) {
+                        this.hide();
+                    }
+                });
+            }*/
         }
 
         this.zone.runOutsideAngular(() => {
